@@ -98,3 +98,69 @@ function viewEmployees() {
     });
 }
 
+function addDepartment() {
+    inquirer
+        .prompt([
+            {
+                type: "input",
+                name: "name",
+                message: "What is the name of the department?",
+            },
+        ])
+        .then((answer) => {
+            const query = "INSERT INTO department SET ?";
+            connection.query(query, { name: answer.name }, (err, res) => {
+                if (err) throw err;
+                console.log(res.affectedRows + " department added!\n");
+                start();
+            });
+        });
+}
+
+function addRole() {
+    const query = "SELECT * FROM department";
+    connection.query(query, (err, res) => {
+        if (err) {
+            throw err;
+        }
+        inquirer
+            .prompt([
+                {
+                    type: "input",
+                    name: "title",
+                    message: "What is the title of the role?",
+                },
+                {
+                    type: "inpit",
+                    name: "salary",
+                    message: "What is the salary for this role?",
+                },
+                {
+                    type: "list",
+                    name: "department",
+                    message: "Which department does this role belong to?",
+                    choices: res.map((department) => department.name),
+                },
+            ])
+            .then((asnwer) => {
+                const department = res.find(
+                    (department) => department.name === answer.department
+                );
+
+                const query = "INSERT INTO role SET ?";
+                const values = {
+                    title: answer.title,
+                    salary: answer.salary,
+                    department_id: department.id,
+                };
+
+                connection.query(query, values, (err, res) => {
+                    if (err) {
+                        throw err;
+                    }
+                    console.log('${answer.title} role has been added!');
+                    startApp();
+                });
+            });
+    });
+}
